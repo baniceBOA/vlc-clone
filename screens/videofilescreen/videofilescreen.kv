@@ -1,0 +1,13 @@
+<VideoFileScreen>:
+    RecycleView:
+        id:rv
+        pos_hint:{'top':0.9}
+        viewclass:'VideoCard'
+        RecycleGridLayout:
+            cols: 2
+            default_size_hint:(1, None)
+            default_size:(None, dp(250))
+            size_hint_y:None
+            height:self.minimum_height
+            spacing:dp(25)
+            padding:[dp(12), dp(8), dp(12), dp(8)]

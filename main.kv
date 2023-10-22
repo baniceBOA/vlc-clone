@@ -1,0 +1,65 @@
+#: import SilverTopAppBar __main__.SilverTopAppBar
+<VLC>:
+    screen_manager:screen_manager
+    toolbar:toolbar
+    SilverTopAppBar:
+        id:toolbar
+        pos_hint:{'top':1}
+    
+
+    MDScreenManager:
+        id: screen_manager
+        AudioScreen:
+            name:'audioscreen'
+        VideoFolderScreen:
+            name:'videofolder'
+        VideoFileScreen:
+            name:'videofilescreen'
+        Player:
+            name:'player'
+    MDBoxLayout:
+        id:bottom_bar
+        pos_hint:{'bottom':1}
+        size_hint_y:None
+        height:bottom_tab.height
+        orientation:'vertical'
+        md_bg_color:'white' if app.theme_cls.theme_style == 'Light' else 'black'
+        MDTabs:
+            id:bottom_tab
+            tab_bar_height:dp(56)
+            on_tab_switch:root.tab_switch(*args)
+            background_color:'white' if app.theme_cls.theme_style == 'Light' else 'black'
+            tab_hint_x:True
+            text_color_normal:'black' if app.theme_cls.theme_style == 'Light' else 'white'
+            text_color_active:app.theme_cls.primary_color
+            indicator_color:app.theme_cls.primary_color
+            IconTab:
+                icon:'video'
+                title:'video'
+                title_icon_mode:'Top'
+            IconTab:
+                icon:'music'
+                title:'music'
+                title_icon_mode:'Top'
+            IconTab:
+                icon:'folder'
+                title:'Browse'
+                title_icon_mode:'Top'
+            IconTab:
+                icon:'playlist-music'
+                title:'playlist'
+                title_icon_mode:'Top'
+            IconTab:
+                icon:'dots-horizontal'
+                title:'more'
+                title_icon_mode:'Top'
+
+    
+            
+                
+            
+
+  
+
+
+    

@@ -1,0 +1,31 @@
+<VideoCard>:
+    radius:dp(12)
+    MDRelativeLayout:
+        MDSmartTile:
+            pos_hint:{'center_x':0.5, 'center_y':0.5}
+            
+            source:root.thumb
+            on_release:root.play_video()
+            TwoLineListItem:
+                text:root.filename
+                theme_text_color:'Custom'
+                text_color:'white' if app.theme_cls.theme_style == 'Dark' else 'black'
+                secondary_theme_text_color:'Custom'
+                secondary_text_color:'grey'
+                secondary_text:root.time
+                _no_ripple_effect: True
+        MDLabel:
+            text:root.drive
+            md_bg_color:[0,0,0,0.5]
+            opacity:0.8
+            pos_hint:{'center_x':0.15, 'center_y':0.85}
+            size_hint_x:None
+            width:dp(30)
+            size_hint_y:None
+            height:dp(30)
+            halign:'center'
+
+        MDIconButton:
+            icon:'dots-vertical'
+            pos_hint:{'center_x':0.85, 'center_y':0.85}
+

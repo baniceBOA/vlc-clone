@@ -1,0 +1,15 @@
+#: import Window kivy.core.window.Window
+<AudioScreen>:
+    pos_hint:{'top':0.92}
+    size_hint_y:None
+    height:Window.size[1]*0.9
+    MDTabs:
+        ScreenTab:
+            title:'ARTISTS'
+        ScreenTab:
+            title:'ALBUMS'
+        ScreenTab:
+            id:tracks
+            title:'TRACKS'
+        ScreenTab:
+            title:'GENRE'

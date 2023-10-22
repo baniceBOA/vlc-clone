@@ -1,0 +1,20 @@
+<VideoFolder>:
+    radius:dp(12)
+    MDRelativeLayout:
+        MDSmartTile:
+            pos_hint:{'center_x':0.5, 'center_y':0.5}
+            source:root.folder_collect_thumb
+            overlap:False
+            lines:2
+            on_release: root.change_screen()
+            TwoLineListItem:
+                text:root.foldername
+                theme_text_color:'Custom'
+                text_color:'orange' if app.theme_cls.theme_style == 'Dark' else 'white'
+                secondary_text:root.vid_count
+                secondary_theme_text_color:'Custom'
+                secondary_text_color:'white' if app.theme_cls.theme_style == 'Dark' else 'orange'
+        MDIconButton:
+            icon:'dots-vertical'
+            pos_hint:{'center_x':0.85, 'center_y':0.85}
+
