@@ -1,8 +1,9 @@
 <AudioFile>:
     text:root.name
+    on_release:root.play_audio(self.source)
     IconLeftWidget:
         icon:'music'
     RightIconButton:
         icon:'dots-vertical'
-        on_release:root.play_file()
+        on_release:root.show_option()
     

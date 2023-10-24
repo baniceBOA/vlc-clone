@@ -1,1 +1,1 @@
-from .minimalaudioplayer import MinimalAudioplayer
+from .minimalaudioplayer import MinimalAudioPlayer
