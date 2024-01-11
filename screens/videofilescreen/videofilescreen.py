@@ -13,7 +13,7 @@ class VideoFileScreen(MDScreen):
     files = ListProperty()
 
     def on_pre_enter(self, *args):
-        ''' perform cleaning of the data before chaning the data'''
+        ''' perform cleaning of the data before changing the data'''
         self.ids.rv.data = []
 
     def on_enter(self,*args):
