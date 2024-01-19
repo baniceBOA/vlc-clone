@@ -1,0 +1,16 @@
+node_modules/
+doc/
+dist/
+lib/
+build/
+_gh_pages/
+cache/
+upload/
+.ipynb_checkpoints
+Untitled.ipynb
+.DS_Store
+yarn-error.log.DS_Store
+/.idea
+TerminalTest.ipynb
+__pycache__
+.hugo_build.lock

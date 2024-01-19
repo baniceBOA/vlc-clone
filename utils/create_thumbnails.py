@@ -9,7 +9,7 @@ def create_thumbnail(filename, output_dir=None):
     '''
     thumbname = f'{os.path.splitext(filename.split(os.sep)[-1])[0]}.png'
     try:
-        import cv as cv2
+        import  cv2
         vcap = cv2.VideoCapture(filename)
         res, im_ar = vcap.read()
         
