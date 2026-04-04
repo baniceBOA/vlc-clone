@@ -37,7 +37,7 @@ version = 1.1.1
 
 # (list) Application requirements
 # comma separated e.g. requirements = sqlite3,kivy
-requirements = python3==3.11, kivy==2.2.1, kivymd==1.1.1,pillow, plyer, moviepy, android, opencv-python, mutagen, ffpyplayer, numpy
+requirements = python3, kivy==2.2.1, kivymd==1.1.1,pillow, plyer, moviepy, android, opencv, mutagen, ffpyplayer, numpy
 
 # (str) Custom source folders for requirements
 # Sets custom source for any requirements with recipes
@@ -64,7 +64,7 @@ orientation = portrait
 # author = © Copyright Info
 
 # change the major version of python used by the app
-osx.python_version = 3.7.6
+osx.python_version = 3.11
 
 # Kivy version to use
 osx.kivy_version = 2.2.1
@@ -95,7 +95,7 @@ android.presplash_color = black
 
 # (list) Permissions
 # (See https://python-for-android.readthedocs.io/en/latest/buildoptions/#build-options-1 for all the supported syntaxes and properties)
-android.permissions = INTERNET,READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE 
+android.permissions = INTERNET,READ_MEDIA_VIDEO, READ_MEDIA_AUDIO, READ_MEDIA_IMAGES
 
 # (list) features (adds uses-feature -tags to manifest)
 #android.features = android.hardware.usb.host
