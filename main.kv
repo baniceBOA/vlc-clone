@@ -28,11 +28,8 @@
             id:bottom_tab
             tab_bar_height:dp(56)
             on_tab_switch:root.tab_switch(*args)
-            background_color:'white' if app.theme_cls.theme_style == 'Light' else 'black'
+            md_bg_color:'white' if app.theme_cls.theme_style == 'Light' else 'black'
             tab_hint_x:True
-            text_color_normal:'black' if app.theme_cls.theme_style == 'Light' else 'white'
-            text_color_active:app.theme_cls.primary_color
-            indicator_color:app.theme_cls.primary_color
             IconTab:
                 icon:'video'
                 title:'video'

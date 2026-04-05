@@ -10,7 +10,7 @@ kivy >= 2.2.1
 ```bash
     pip install kivy
 ```
-kivymd >= 1.1.1
+kivymd >= 1.2.0
 ```bash
     pip install kivymd
 ```

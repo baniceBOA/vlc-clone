@@ -1,5 +1,5 @@
 
-from kivymd.uix.list import OneLineAvatarIconListItem, IRightBodyTouch
+from kivymd.uix.list import OneLineAvatarIconListItem
 from kivymd.uix.button import MDIconButton
 from kivymd.app import MDApp
 from kivy.properties import StringProperty, ObjectProperty, NumericProperty
@@ -11,7 +11,7 @@ from datetime import timedelta
 from ..MinimalAudioplayer import MinimalAudioPlayer
 Builder.load_file(os.path.join(os.path.dirname(__file__), 'audiofile.kv'))
 
-class RightIconButton(IRightBodyTouch, MDIconButton):
+class RightIconButton(MDIconButton):
     pass
 
 class AudioFile(OneLineAvatarIconListItem):
