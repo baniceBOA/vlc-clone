@@ -12,5 +12,7 @@ Untitled.ipynb
 yarn-error.log.DS_Store
 /.idea
 TerminalTest.ipynb
+vlcclone-key.jks
+vlcclone-keystore-base64.txt
 /__pycache__
 .hugo_build.lock

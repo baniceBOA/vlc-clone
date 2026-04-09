@@ -61,8 +61,20 @@ jobs:
           python-version: 3.11
           buildozer-cmd: buildozer -v android release
 
-      
-      # Step 3: Zipalign and Sign the APK
+      # Step 3: Read app metadata from buildozer.spec
+      - name: Set artifact metadata
+        id: artifact-metadata
+        run: |
+          APP_NAME=$(grep '^title = ' buildozer.spec | cut -d'=' -f2- | sed 's/^ *//; s/ *$//')
+          APP_VERSION=$(grep -E '^\\?version = ' buildozer.spec | cut -d'=' -f2- | sed 's/^ *//; s/ *$//')
+          APP_NAME_SAFE=$(echo "$APP_NAME" | tr '[:upper:]' '[:lower:]' | tr ' ' '-' | tr -cd '[:alnum:]-_.')
+          ARTIFACT_NAME="${APP_NAME_SAFE}-${APP_VERSION}.apk"
+          echo "APP_NAME=$APP_NAME" >> $GITHUB_ENV
+          echo "APP_VERSION=$APP_VERSION" >> $GITHUB_ENV
+          echo "ARTIFACT_NAME=$ARTIFACT_NAME" >> $GITHUB_ENV
+        shell: bash
+
+      # Step 4: Zipalign and Sign the APK
       - name: Zipalign and Sign APK
         run: |
           # 1. Find the unsigned release APK
@@ -80,13 +92,17 @@ jobs:
             --ks-key-alias "${{ secrets.KEY_ALIAS }}" \
             --key-pass pass:"${{ secrets.KEY_PASSWORD }}" \
             --out release-signed.apk aligned-release.apk
+          
+          mv release-signed.apk "${ARTIFACT_NAME}"
+        env:
+          ARTIFACT_NAME: ${{ env.ARTIFACT_NAME }}
 
-      # Step 4: Upload the final signed APK
+      # Step 5: Upload the final signed APK
       - name: Upload Signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: signed-release-apk
-          path: release-signed.apk
+          name: ${{ env.ARTIFACT_NAME }}
+          path: ${{ env.ARTIFACT_NAME }}
 
 
      
