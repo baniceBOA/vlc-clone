@@ -6,6 +6,7 @@ from kivy.clock import Clock
 from kivy.lang import Builder
 import os
 from threading import Thread
+from functools import partial
 
 from utils import create_thumbnail
 from components import VideoFolder, SilverTopAppBar
@@ -18,29 +19,37 @@ class VideoFolderScreen(MDScreen):
     def _find_index_in_motion_filter(self, type_id, widget):
         return super()._find_index_in_motion_filter(type_id, widget)
     def find_videos(self, interval):
+        Thread(target=self._scan_videos, daemon=True).start()
+
+    def _scan_videos(self):
         app = MDApp.get_running_app()
         paths = app.root.system_storage
-        self.videos = []
-        for path in paths:  
+        videos = []
+        folders = {}
+
+        for path in paths:
             for dirpath, dirname, filenames in os.walk(path):
                 for filename in filenames:
-                    if filename.endswith('.mp4') or filename.endswith('.mkv')  or filename.endswith('.avi'):
-                        self.videos.append(os.path.join(dirpath, filename))
+                    if filename.endswith('.mp4') or filename.endswith('.mkv') or filename.endswith('.avi'):
+                        filepath = os.path.join(dirpath, filename)
+                        videos.append(filepath)
 
-        for vid in self.videos:
+        for vid in videos:
             dirs = os.path.dirname(vid).split(os.sep)[-1]
-            if dirs in self.folders:
-                pass
-            else:
-                metadata = {}
-                metadata['files'] = [os.path.join(os.path.dirname(vid), filename) for filename in os.listdir(os.path.dirname(vid)) if self.check_video(filename)]
-                metadata['count'] = len(os.listdir(os.path.dirname(vid)))
-                self.folders[dirs] =  metadata
-        Clock.schedule_once(self.update, 1)
-        Thread(target=self.create_thumb_pic, args=()).start()
+            if dirs in folders:
+                continue
+            metadata = {}
+            metadata['files'] = [os.path.join(os.path.dirname(vid), filename) for filename in os.listdir(os.path.dirname(vid)) if self.check_video(filename)]
+            metadata['count'] = len(metadata['files'])
+            folders[dirs] = metadata
 
-        
-        
+        Clock.schedule_once(partial(self._on_scan_complete, videos, folders), 0)
+
+    def _on_scan_complete(self, videos, folders, interval):
+        self.videos = videos
+        self.folders = folders
+        self.update(interval)
+        Thread(target=self.create_thumb_pic, daemon=True).start()
 
     def on_enter(self, *args):
         Logger.info('Finding Images')
@@ -57,24 +66,42 @@ class VideoFolderScreen(MDScreen):
         #Clock.schedule_once(self.update, 1)
         pass 
     def create_thumb_pic(self):
+        thumb_dir = os.path.join('assests', 'thumbs')
+        os.makedirs(thumb_dir, exist_ok=True)
+        existing_thumbs = set(os.listdir(thumb_dir))
+
         for filename in self.videos:
-            name = f'{os.path.splitext(filename)[0]}.png'
-            if name in os.listdir('assests/thumbs'):
-                #the thumbnail was already created
-                pass
-            else:
-                if os.path.exists(filename):
-                    try:
-                        create_thumbnail(filename, output_dir='assests/thumbs')
-                    except Exception as e:
-                        Logger.error(e)
+            thumb_name = f"{os.path.splitext(os.path.basename(filename))[0]}.png"
+            thumb_path = os.path.join(thumb_dir, thumb_name)
+            if thumb_name in existing_thumbs and os.path.exists(thumb_path):
+                continue
+
+            if not os.path.exists(filename):
+                continue
+
+            try:
+                create_thumbnail(filename, output_dir=thumb_dir)
+                Clock.schedule_once(self.refresh_thumbnails, 0)
+            except Exception as e:
+                Logger.error(f"VideoFolderScreen:create_thumb_pic {e}")
+
+    def refresh_thumbnails(self, interval):
+        self.ids.rv.data = []
+        self.update(interval)
 
     def update(self, interval):
+        self.ids.rv.data = []
+        thumb_dir = os.path.join('assests', 'thumbs')
         for folder, count in self.folders.items():
             data = {}
             data['foldername'] = folder
             data['vid_count'] = f"{count['count']} videos"
-            data['folder_collect_thumb'] = 'assests/thumbs/rihanna.png'
+            first_file = count['files'][0] if count['files'] else None
+            if first_file:
+                expected_thumb = os.path.join(thumb_dir, f"{os.path.splitext(os.path.basename(first_file))[0]}.png")
+                data['folder_collect_thumb'] = expected_thumb if os.path.exists(expected_thumb) else 'assests/thumbs/rihanna.png'
+            else:
+                data['folder_collect_thumb'] = 'assests/thumbs/rihanna.png'
             data['files'] = count['files']
             self.ids.rv.data.append(data)
         
