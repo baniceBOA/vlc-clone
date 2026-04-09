@@ -12,5 +12,5 @@ Untitled.ipynb
 yarn-error.log.DS_Store
 /.idea
 TerminalTest.ipynb
-__pycache__
+/__pycache__
 .hugo_build.lock
