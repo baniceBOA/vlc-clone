@@ -5,8 +5,13 @@ from kivy.properties import StringProperty, NumericProperty
 from mutagen.mp4 import MP4
 from kivy.clock import Clock
 from kivy.core.window import Window
+from kivy.utils import platform
 from kivymd.app import MDApp
 from datetime import timedelta
+
+from ffpyplayer.player import MediaPlayer
+import time
+
 import os
 import subprocess
 
@@ -71,12 +76,34 @@ class Player(MDScreen):
         self.ids.video_progressbar.value = position
     
     def get_length(self, filename):
-        result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
-                                "format=duration", "-of",
-                                "default=noprint_wrappers=1:nokey=1", filename],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT)
-        return float(result.stdout)
+        if platform == 'android':
+            try:
+                player = MediaPlayer(filename, ff_opts={'nodisp': True, 'an': True})
+                
+                # Wait a moment for the player to initialize and read metadata
+                timeout = time.time() + 2
+                while time.time() < timeout:
+                    metadata = player.get_metadata()
+                    if metadata and 'duration' in metadata:
+                        return float(metadata['duration'])
+                    time.sleep(0.1)
+                
+                player.close_player()
+            except Exception as e:
+                print(f"Error getting duration: {e}")
+            
+            return 0
+        else:
+            result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",
+                                    "format=duration", "-of",
+                                    "default=noprint_wrappers=1:nokey=1", filename],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT)
+            return float(result.stdout)
+
+        
+        # Instead of subprocess.run(['ffprobe', ...])
+        
 
     def key_input(self, window, key, scancode, codepoint, modifier):
         print(key)
