@@ -1,4 +1,4 @@
-__version__ = '1.1.3'
+__version__ = '1.2.0'
 import os
 os.environ['KIVY_VIDEO'] = 'ffpyplayer'
 from kivymd.app import MDApp
