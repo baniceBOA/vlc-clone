@@ -4,6 +4,7 @@ from kivy.properties import ListProperty, DictProperty
 from kivy.logger import Logger
 from kivy.clock import Clock
 from kivy.lang import Builder
+from kivy.utils import platform
 import os
 from threading import Thread
 from functools import partial
@@ -62,11 +63,17 @@ class VideoFolderScreen(MDScreen):
         else:
             return False
 
+    def get_thumb_dir(self):
+        app = MDApp.get_running_app()
+        if app and platform == 'android':
+            return os.path.join(app.user_data_dir, 'assests', 'thumbs')
+        return os.path.join('assests', 'thumbs')
+
     def on_folders(self, *args):
         #Clock.schedule_once(self.update, 1)
         pass 
     def create_thumb_pic(self):
-        thumb_dir = os.path.join('assests', 'thumbs')
+        thumb_dir = self.get_thumb_dir()
         os.makedirs(thumb_dir, exist_ok=True)
         existing_thumbs = set(os.listdir(thumb_dir))
 
@@ -91,7 +98,7 @@ class VideoFolderScreen(MDScreen):
 
     def update(self, interval):
         self.ids.rv.data = []
-        thumb_dir = os.path.join('assests', 'thumbs')
+        thumb_dir = self.get_thumb_dir()
         for folder, count in self.folders.items():
             data = {}
             data['foldername'] = folder

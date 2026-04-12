@@ -1,7 +1,9 @@
 from kivymd.uix.screen import MDScreen
+from kivymd.app import MDApp
 from kivy.properties import ListProperty
 from kivy.lang import Builder
 from kivy.clock import Clock
+from kivy.utils import platform
 import os
 
 from components import VideoCard
@@ -20,10 +22,15 @@ class VideoFileScreen(MDScreen):
         Clock.schedule_once(self.get_files, 1)
     def get_files(self, invterval):
         self.ids.rv.data = []
+        thumb_dir = os.path.join('assests', 'thumbs')
+        app = MDApp.get_running_app()
+        if app and platform == 'android':
+            thumb_dir = os.path.join(app.user_data_dir, 'assests', 'thumbs')
+
         if self.files:
             for file in self.files:
                 data = {}
-                data['thumb'] = f'assests/thumbs/{os.path.splitext(os.path.split(file)[1])[0]}.png'
+                data['thumb'] = os.path.join(thumb_dir, f'{os.path.splitext(os.path.split(file)[1])[0]}.png')
                 data['drive'] = os.path.splitdrive(file)[0]
                 data['filename'] = os.path.split(file)[1]
                 data['source'] = file

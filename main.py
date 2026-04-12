@@ -19,13 +19,37 @@ from plyer import storagepath
 
 from screens import VideoFolderScreen, VideoFileScreen, AudioScreen, Player
 from components import SilverTopAppBar
-from utils import check_and_request_all_files_access
+from utils import check_and_request_all_files_access, has_manage_storage_permission
 
 
 class VLC(MDScreen):
     toolbar = ObjectProperty()
     screen_manager = ObjectProperty()
-    system_storage = ListProperty([storagepath.get_videos_dir(), storagepath.get_music_dir(), storagepath.get_downloads_dir()])
+    system_storage = ListProperty()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.system_storage = self.get_adaptive_paths()
+    def get_adaptive_paths(self):
+        if platform == 'android':
+            from android.storage import primary_external_storage_path
+            # On Android, we target the root of the user's shared storage
+            primary = primary_external_storage_path()
+            return [primary, ]
+        elif platform == 'ios':
+            # iOS is highly restricted; usually you only get the app's Documents folder
+            return [os.path.expanduser('~/Documents')]
+        else:
+            # Desktop (Windows/Linux/macOS)
+            try:
+                return [
+                    storagepath.get_videos_dir(),
+                    storagepath.get_music_dir(),
+                    storagepath.get_downloads_dir()
+                ]
+            except Exception:
+                # Fallback if plyer fails on certain Linux distros
+                home = os.path.expanduser("~")
+                return [os.path.join(home, d) for d in ['Videos', 'Music', 'Downloads']]
 
     def on_enter(self, *args):
         print(self.ids.sliverappbar.toolbar_cls)
@@ -58,7 +82,8 @@ class MainApp(MDApp):
 
             
             if api_version >= 30:
-                self.show_permission_explanation()
+                if not has_manage_storage_permission():
+                    self.show_permission_explanation()
             
     def show_permission_explanation(self):
         if not self.dialog:

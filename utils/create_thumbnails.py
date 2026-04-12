@@ -1,5 +1,15 @@
 
 import os
+from kivy.app import App
+from kivy.utils import platform
+from kivy.resources import resource_find
+
+
+def get_thumbnail_dir():
+    app = App.get_running_app()
+    if app and platform == 'android':
+        return os.path.join(app.user_data_dir, 'assests', 'thumbs')
+    return os.path.join('assests', 'thumbs')
 
 
 def create_thumbnail(filename, output_dir=None):
@@ -8,6 +18,10 @@ def create_thumbnail(filename, output_dir=None):
 
     '''
     thumbname = f'{os.path.splitext(filename.split(os.sep)[-1])[0]}.png'
+    if not output_dir:
+        output_dir = get_thumbnail_dir()
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
     try:
         import  cv2
         vcap = cv2.VideoCapture(filename)
@@ -48,7 +62,10 @@ def create_thumbnail(filename, output_dir=None):
         except Exception as e:
             print('Failed to create a thumbname using default')
             from PIL import Image
-            defaultimage = Image.open('/assests/thumbs/videothumb.png')
+            default_path = resource_find(os.path.join('assests', 'thumbs', 'videothumb.png'))
+            if not default_path:
+                default_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assests', 'thumbs', 'videothumb.png')
+            defaultimage = Image.open(default_path)
             if output_dir:
                 defaultimage.save(os.path.join(output_dir, thumbname))
                 return os.path.join(output_dir, thumbname)
