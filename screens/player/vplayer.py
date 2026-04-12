@@ -1,13 +1,13 @@
 
 from kivymd.uix.screen import  MDScreen
 from kivy.lang import Builder
-from kivy.properties import StringProperty, NumericProperty
+from kivy.properties import StringProperty, NumericProperty, BooleanProperty
 from mutagen.mp4 import MP4
 from kivy.clock import Clock
-from kivy.core.window import Window
 from kivy.utils import platform
 from kivymd.app import MDApp
 from datetime import timedelta
+from plyer import accelerometer
 
 from ffpyplayer.player import MediaPlayer
 import time
@@ -24,14 +24,85 @@ class Player(MDScreen):
     duration = NumericProperty(0)
     thumb = StringProperty()
     time_duration = StringProperty('00:00')
+    is_landscape = BooleanProperty(False)
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         Clock.schedule_once(self.late_init,1)
+        self._accel_event = None
 
     def late_init(self, interval):
-        Window.bind(on_keyboard=self.key_input)
         self.ids.video.bind(position=self.change_slider_value)
+
+    def on_enter(self, *args):
+        if platform == 'android':
+            try:
+                accelerometer.enable()
+            except Exception as e:
+                print('Accelerometer enable failed:', e)
+            self._accel_event = Clock.schedule_interval(self.check_device_orientation, 0.5)
+        self.apply_orientation()
+
+    def on_pre_enter(self, *args):
+        self.ids.video.preview = self.thumb
+
+    def on_leave(self, *args):
+        self.ids.video.play = False
+        self.ids.video.unload()
+        if platform == 'android':
+            try:
+                accelerometer.disable()
+            except Exception:
+                pass
+            if self._accel_event:
+                self._accel_event.cancel()
+                self._accel_event = None
+            self.is_landscape = False
+            self.apply_orientation()
+
+    def apply_orientation(self):
+        if platform == 'android':
+            try:
+                from jnius import autoclass
+                PythonActivity = autoclass('org.kivy.android.PythonActivity')
+                ActivityInfo = autoclass('android.content.pm.ActivityInfo')
+                activity = PythonActivity.mActivity
+                orientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE if self.is_landscape else ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
+                activity.setRequestedOrientation(orientation)
+            except Exception as e:
+                print('Orientation apply failed:', e)
+
+        if self.ids.get('top_bar'):
+            self.ids.top_bar.opacity = 0 if self.is_landscape else 1
+            self.ids.top_bar.disabled = self.is_landscape
+        if self.ids.get('control_bar'):
+            self.ids.control_bar.opacity = 0 if self.is_landscape else 1
+            self.ids.control_bar.disabled = self.is_landscape
+
+    def toggle_landscape(self):
+        self.is_landscape = not self.is_landscape
+        self.apply_orientation()
+
+    def check_device_orientation(self, dt):
+        try:
+            acc = accelerometer.acceleration
+        except Exception:
+            return
+        if not acc or len(acc) < 2:
+            return
+        x, y, _ = acc
+        if x is None or y is None:
+            return
+        if abs(x) > abs(y) and abs(x) > 3:
+            desired = True
+        elif abs(y) > abs(x) and abs(y) > 3:
+            desired = False
+        else:
+            return
+        if desired != self.is_landscape:
+            self.is_landscape = desired
+            self.apply_orientation()
+
     def on_source(self, instance, value):
         if value.endswith('.mp4'):
             self.duration = MP4(value).info.length
@@ -46,12 +117,6 @@ class Player(MDScreen):
         else:
             #prevent division by zero error
             self.duration = 1
-    def on_pre_enter(self, *args):
-        self.ids.video.preview = self.thumb
-        
-    def on_leave(self, *args):
-        self.ids.video.play = False
-        self.ids.video.unload()
 
             
         
@@ -103,17 +168,4 @@ class Player(MDScreen):
 
         
         # Instead of subprocess.run(['ffprobe', ...])
-        
-
-    def key_input(self, window, key, scancode, codepoint, modifier):
-        print(key)
-        if key == 27 or key == 13 or key == 8:
-            app = MDApp.get_running_app()
-            app.root.add_widget(app.root.ids.bottom_bar)
-            app.root.screen_manager.current = 'videofilescreen'
-            return True # override the default behaviour
-        else:
-            # the key now does nothing
-            return False
-            
 

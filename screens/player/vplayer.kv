@@ -1,3 +1,4 @@
+#: import dp kivy.metrics.dp
 
 <Player>:
     MDRelativeLayout:
@@ -6,12 +7,19 @@
             id:video
             source:root.source
             play:False
-            
+            allow_stretch: True
+            keep_ratio: False
+            size_hint: 1, 1
+            pos_hint: {'x': 0, 'y': 0}
+
         MDTopAppBar:
+            id: top_bar
             title:root.title
             pos_hint:{'top':1}
             md_bg_color:app.theme_cls.bg_darkest
+            right_action_items:[['screen-rotation', lambda x: root.toggle_landscape()]]
         MDBoxLayout:
+            id: control_bar
             md_bg_color:[0,0,0,0.5]
             size_hint_y:None
             height:video.height*0.1

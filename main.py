@@ -6,6 +6,8 @@ from kivymd.uix.screen import MDScreen
 from kivy.properties import ObjectProperty, ListProperty
 from kivy.core.window import Window
 from kivy.utils import platform
+from kivy.clock import Clock
+from kivymd.uix.snackbar import Snackbar
 
 from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
@@ -26,9 +28,48 @@ class VLC(MDScreen):
     toolbar = ObjectProperty()
     screen_manager = ObjectProperty()
     system_storage = ListProperty()
+    screen_history = ListProperty()
+    _ignore_history = False
+    _back_pressed = False
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.system_storage = self.get_adaptive_paths()
+        self.screen_history = []
+        self._ignore_history = False
+        self._back_pressed = False
+
+    def on_kv_post(self, base_widget):
+        self.screen_manager.bind(current=self.on_screen_current)
+        self._prev_screen = self.screen_manager.current
+
+    def on_screen_current(self, manager, value):
+        if self._ignore_history:
+            self._ignore_history = False
+        else:
+            if hasattr(self, '_prev_screen') and self._prev_screen and self._prev_screen != value:
+                self.screen_history.append(self._prev_screen)
+        self._prev_screen = value
+
+    def go_back(self):
+        if self.screen_history:
+            previous = self.screen_history.pop()
+            self._ignore_history = True
+            self.screen_manager.current = previous
+            return True
+
+        if self._back_pressed:
+            Window.close()
+            return True
+
+        self._back_pressed = True
+        Snackbar(text='Press back again to exit').open()
+        Clock.schedule_once(self.reset_back_pressed, 2)
+        return True
+
+    def reset_back_pressed(self, dt):
+        self._back_pressed = False
+
     def get_adaptive_paths(self):
         if platform == 'android':
             from android.storage import primary_external_storage_path
@@ -67,8 +108,11 @@ class MainApp(MDApp):
         self.theme_cls.primary_palette = 'Orange'
         self.theme_cls.primary_hue = "800"
         self.theme_cls.theme_style = 'Dark'
+        if platform == 'android':
+            Window.softinput_mode = "adjust_resize"
         return VLC()
     def on_start(self):
+        Window.bind(on_keyboard=self.on_keyboard)
         if platform == 'android':
             from android.permissions import request_permissions, Permission
             from android import api_version
@@ -113,6 +157,12 @@ class MainApp(MDApp):
         self.dialog.dismiss()
         # Call the JNI function we defined previously
         check_and_request_all_files_access()
+
+    def on_keyboard(self, window, key, *args):
+        if key == 27:
+            if self.root:
+                return self.root.go_back()
+        return False
     
     
 if __name__ == '__main__':

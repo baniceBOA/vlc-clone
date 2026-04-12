@@ -15,4 +15,5 @@ TerminalTest.ipynb
 vlcclone-key.jks
 vlcclone-keystore-base64.txt
 /__pycache__
+__pycache__/
 .hugo_build.lock
