@@ -6,8 +6,26 @@
     MDTabs:
         ScreenTab:
             title:'ARTISTS'
+            RecycleView:
+                id: artist_rv
+                viewclass: 'TwoLineIconListItem' # Or your custom list item
+                RecycleBoxLayout:
+                    default_size: None, dp(72)
+                    default_size_hint: 1, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
         ScreenTab:
             title:'ALBUMS'
+            RecycleView:
+                id: album_rv
+                viewclass: 'TwoLineIconListItem'
+                RecycleBoxLayout:
+                    default_size: None, dp(72)
+                    default_size_hint: 1, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
         ScreenTab:
             id:tracks
             title:'TRACKS'
@@ -15,3 +33,12 @@
                 id:audio_rv
         ScreenTab:
             title:'GENRE'
+            RecycleView:
+                id: genre_rv
+                viewclass: 'TwoLineIconListItem'
+                RecycleBoxLayout:
+                    default_size: None, dp(72)
+                    default_size_hint: 1, None
+                    size_hint_y: None
+                    height: self.minimum_height
+                    orientation: 'vertical'
