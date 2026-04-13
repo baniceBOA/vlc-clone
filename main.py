@@ -104,6 +104,7 @@ class VLC(MDScreen):
 
 class MainApp(MDApp):
     dialog = None
+    current_audio = None
     def build(self):
         self.theme_cls.primary_palette = 'Orange'
         self.theme_cls.primary_hue = "800"
@@ -124,7 +125,13 @@ class MainApp(MDApp):
                 Permission.WRITE_EXTERNAL_STORAGE
             ])
 
-            
+            try:
+                from android import activity
+                activity.bind(on_new_intent=self.on_new_intent)
+                self.process_audio_intent(activity.getIntent())
+            except Exception as e:
+                print('Audio intent bind failed:', e)
+
             if api_version >= 30:
                 if not has_manage_storage_permission():
                     self.show_permission_explanation()
@@ -163,7 +170,31 @@ class MainApp(MDApp):
             if self.root:
                 return self.root.go_back()
         return False
-    
-    
+
+    def on_new_intent(self, intent):
+        self.process_audio_intent(intent)
+
+    def process_audio_intent(self, intent):
+        if not intent:
+            return
+        try:
+            action = intent.getStringExtra('audio_action')
+            if action and self.current_audio:
+                if action == 'toggle':
+                    if self.current_audio.player and self.current_audio.player.state == 'play':
+                        self.current_audio.toggle_playback()
+                    else:
+                        self.current_audio.play_from_notification()
+                elif action == 'stop':
+                    self.current_audio.stop_from_notification()
+                elif action == 'open':
+                    pass
+        except Exception as e:
+            print('Audio intent processing failed:', e)
+
+    def on_pause(self):
+        return True
+
+
 if __name__ == '__main__':
     MainApp().run()

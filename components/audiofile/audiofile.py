@@ -6,9 +6,11 @@ from kivy.properties import StringProperty, ObjectProperty, NumericProperty
 from kivy.core.audio import SoundLoader
 from kivy.lang import Builder
 from kivy.clock import Clock
+from kivy.utils import platform
 import os
 from datetime import timedelta
 from ..MinimalAudioplayer import MinimalAudioPlayer
+from utils.audio_notification import show_audio_notification, cancel_audio_notification
 Builder.load_file(os.path.join(os.path.dirname(__file__), 'audiofile.kv'))
 
 class RightIconButton(MDIconButton):
@@ -31,6 +33,9 @@ class AudioFile(OneLineAvatarIconListItem):
         print(self.source)
 
     def play_audio(self, filename):
+        app = MDApp.get_running_app()
+        app.current_audio = self
+        self.source = filename
         if self.min_player and self.player:
             # we already have a player loaded just change the song
             # but first remove the current playing song
@@ -47,7 +52,49 @@ class AudioFile(OneLineAvatarIconListItem):
             if play_file:
                 self.screen_player.add_widget(self.min_player)
                 self.player = play_file
+        self.update_notification(True)
             
+    def pause_play(self, instance):
+        print(self.player.state, instance.icon )
+        if self.player.state == 'play' and instance.icon == 'pause-circle-outline':
+            self.toggle_playback()
+        elif self.player.state == 'stop' and instance.icon == 'play-circle-outline':
+            self.toggle_playback()
+
+    def update_notification(self, is_playing):
+        title = os.path.split(self.source)[1] if self.source else 'Audio'
+        text = 'Playing' if is_playing else 'Paused'
+        show_audio_notification(title, text, is_playing=is_playing)
+
+    def toggle_playback(self):
+        if not self.player:
+            return
+        if self.player.state == 'play':
+            self.player.stop()
+            if self.min_player:
+                self.min_player.min_player_btn.icon = 'play-circle-outline'
+            Clock.unschedule(self.update_progress)
+            self.update_notification(False)
+        else:
+            self.player.play()
+            if self.min_player:
+                self.min_player.min_player_btn.icon = 'pause-circle-outline'
+            Clock.schedule_interval(self.update_progress, 1)
+            self.update_notification(True)
+
+    def play_from_notification(self):
+        if not self.player:
+            return
+        if self.player.state != 'play':
+            self.player.play()
+            if self.min_player:
+                self.min_player.min_player_btn.icon = 'pause-circle-outline'
+            Clock.schedule_interval(self.update_progress, 1)
+            self.update_notification(True)
+
+    def stop_from_notification(self):
+        self.terminate()
+
     def on_player(self, instance, value):
         '''' value here is the player'''
         if value:
@@ -55,22 +102,12 @@ class AudioFile(OneLineAvatarIconListItem):
             delta = timedelta(seconds=self.duration)
             h, m, s = str(delta).split(':')
             self.length = f'{h}:{m}:{round(float(s))}'
-            self.min_player.length = self.length
+            if self.min_player:
+                self.min_player.length = self.length
             value.play()
+            self.update_notification(True)
             if value.state == 'play':
                 Clock.schedule_interval(self.update_progress, 1)
-
-    def pause_play(self, instance):
-        print(self.player.state, instance.icon )
-        if self.player.state == 'play' and instance.icon =='pause-circle-outline' :
-            self.player.stop()
-            instance.icon = 'play-circle-outline'
-            Clock.unschedule(self.update_progress)
-
-        elif self.player.state == 'stop' and instance.icon == 'play-circle-outline':
-            instance.icon = 'pause-circle-outline' 
-            self.player.play()
-            Clock.schedule_interval(self.update_progress, 1) 
 
     def update_progress(self, interval):
         position = self.player.get_pos()
@@ -87,9 +124,12 @@ class AudioFile(OneLineAvatarIconListItem):
             pass
     def termininate(self):
         Clock.unschedule(self.update_progress)
-        self.screen_player.remove_widget(self.min_player)
-        self.player.stop()
-        self.player.unload()
+        cancel_audio_notification()
+        if self.min_player and self.screen_player:
+            self.screen_player.remove_widget(self.min_player)
+        if self.player:
+            self.player.stop()
+            self.player.unload()
         
 
         
