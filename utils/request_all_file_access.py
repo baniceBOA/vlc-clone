@@ -29,3 +29,17 @@ if platform == 'android':
                 # Fallback to the general All Files Access settings page
                 intent = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
                 current_activity.startActivity(intent)
+    def has_manage_storage_permission():
+        if platform != 'android':
+            return True
+        
+        from jnius import autoclass
+        from android import api_version
+        
+        # MANAGE_EXTERNAL_STORAGE only exists on API 30 (Android 11) and above
+        if api_version >= 30:
+            Environment = autoclass('android.os.Environment')
+            return Environment.isExternalStorageManager()
+        
+        # For older versions, this specific permission doesn't exist
+        return True
