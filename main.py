@@ -1,4 +1,4 @@
-__version__ = '1.2.0'
+__version__ = '1.2.1'
 import os
 os.environ['KIVY_VIDEO'] = 'ffpyplayer'
 from kivymd.app import MDApp
@@ -85,7 +85,9 @@ class VLC(MDScreen):
                 return [
                     storagepath.get_videos_dir(),
                     storagepath.get_music_dir(),
-                    storagepath.get_downloads_dir()
+                    storagepath.get_downloads_dir(),
+                    "D:/",  # Optional: Add root of D drive for easier access on Windows
+
                 ]
             except Exception:
                 # Fallback if plyer fails on certain Linux distros

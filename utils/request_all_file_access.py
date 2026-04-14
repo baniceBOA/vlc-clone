@@ -43,3 +43,8 @@ if platform == 'android':
         
         # For older versions, this specific permission doesn't exist
         return True
+else:
+    def has_manage_storage_permission():
+        return True
+    def check_and_request_all_files_access():
+        pass
