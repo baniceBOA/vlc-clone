@@ -1,44 +1,52 @@
+#: import dp kivy.metrics.dp
 #: import Window kivy.core.window.Window
 <AudioScreen>:
-    pos_hint:{'top':0.92}
-    size_hint_y:None
-    height:Window.size[1]*0.9
-    MDTabs:
-        ScreenTab:
-            title:'ARTISTS'
-            RecycleView:
-                id: artist_rv
-                viewclass: 'TwoLineIconListItem' # Or your custom list item
-                RecycleBoxLayout:
-                    default_size: None, dp(72)
-                    default_size_hint: 1, None
-                    size_hint_y: None
-                    height: self.minimum_height
-                    orientation: 'vertical'
-        ScreenTab:
-            title:'ALBUMS'
-            RecycleView:
-                id: album_rv
-                viewclass: 'TwoLineIconListItem'
-                RecycleBoxLayout:
-                    default_size: None, dp(72)
-                    default_size_hint: 1, None
-                    size_hint_y: None
-                    height: self.minimum_height
-                    orientation: 'vertical'
-        ScreenTab:
-            id:tracks
-            title:'TRACKS'
-            AudioRV:
-                id:audio_rv
-        ScreenTab:
-            title:'GENRE'
-            RecycleView:
-                id: genre_rv
-                viewclass: 'TwoLineIconListItem'
-                RecycleBoxLayout:
-                    default_size: None, dp(72)
-                    default_size_hint: 1, None
-                    size_hint_y: None
-                    height: self.minimum_height
-                    orientation: 'vertical'
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(8)
+        padding: dp(8)
+        MDTextField:
+            id: search_field
+            hint_text: 'Search audio'
+            size_hint_x: 0.95
+            pos_hint: {'center_x': 0.5}
+            on_text: root.on_search(self.text)
+        MDTabs:
+            ScreenTab:
+                title:'ARTISTS'
+                RecycleView:
+                    id: artist_rv
+                    viewclass: 'TwoLineIconListItem'
+                    RecycleBoxLayout:
+                        default_size: None, dp(72)
+                        default_size_hint: 1, None
+                        size_hint_y: None
+                        height: self.minimum_height
+                        orientation: 'vertical'
+            ScreenTab:
+                title:'ALBUMS'
+                RecycleView:
+                    id: album_rv
+                    viewclass: 'TwoLineIconListItem'
+                    RecycleBoxLayout:
+                        default_size: None, dp(72)
+                        default_size_hint: 1, None
+                        size_hint_y: None
+                        height: self.minimum_height
+                        orientation: 'vertical'
+            ScreenTab:
+                id: tracks
+                title:'TRACKS'
+                AudioRV:
+                    id: audio_rv
+            ScreenTab:
+                title:'GENRE'
+                RecycleView:
+                    id: genre_rv
+                    viewclass: 'TwoLineIconListItem'
+                    RecycleBoxLayout:
+                        default_size: None, dp(72)
+                        default_size_hint: 1, None
+                        size_hint_y: None
+                        height: self.minimum_height
+                        orientation: 'vertical'

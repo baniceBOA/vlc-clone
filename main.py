@@ -19,7 +19,7 @@ if platform != 'android':
 from plyer import storagepath
 
 
-from screens import VideoFolderScreen, VideoFileScreen, AudioScreen, Player
+from screens import VideoFolderScreen, VideoFileScreen, AudioScreen, BrowseScreen, PlaylistScreen, Player
 from components import SilverTopAppBar
 from utils import check_and_request_all_files_access, has_manage_storage_permission
 
@@ -100,6 +100,10 @@ class VLC(MDScreen):
             self.screen_manager.current = 'videofolder'
         elif instance_tab.title == 'music':
             self.screen_manager.current = 'audioscreen'
+        elif instance_tab.title == 'Browse':
+            self.screen_manager.current = 'browse'
+        elif instance_tab.title == 'playlist':
+            self.screen_manager.current = 'playlist'
 
 
 class MainApp(MDApp):
@@ -135,6 +139,9 @@ class MainApp(MDApp):
             if api_version >= 30:
                 if not has_manage_storage_permission():
                     self.show_permission_explanation()
+    def on_pause(self):
+        return True
+    
             
     def show_permission_explanation(self):
         if not self.dialog:
@@ -193,6 +200,13 @@ class MainApp(MDApp):
             print('Audio intent processing failed:', e)
 
     def on_pause(self):
+        if platform == 'android' and self.root:
+            try:
+                player = self.root.screen_manager.get_screen('player')
+                if getattr(player.ids.video, 'play', False):
+                    player.enter_pip_mode()
+            except Exception as e:
+                print('Enter PIP on pause failed:', e)
         return True
 
 

@@ -57,7 +57,7 @@ icon.filename = presplash.png
 # (list) Supported orientations
 # Valid options are: landscape, portrait, portrait-reverse or landscape-reverse
 orientation = portrait
-
+android.manifest.application_arguments = android:supportsPictureInPicture="true" android:resizeableActivity="true"
 # (list) List of services to declare
 # This is currently only relevant to Android services.
 # Each service consists of a name (a valid Java class name, with the first letter capitalized)

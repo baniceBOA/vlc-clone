@@ -1,0 +1,21 @@
+#: import dp kivy.metrics.dp
+<PlaylistScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(8)
+        padding: dp(8)
+        MDLabel:
+            text: 'Playlist'
+            font_style: 'H6'
+            size_hint_y: None
+            height: self.texture_size[1]
+            halign: 'left'
+        RecycleView:
+            id: rv
+            viewclass: 'OneLineListItem'
+            RecycleBoxLayout:
+                default_size: None, dp(56)
+                default_size_hint: 1, None
+                size_hint_y: None
+                height: self.minimum_height
+                orientation: 'vertical'

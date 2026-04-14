@@ -1,5 +1,6 @@
 from kivy.lang import Builder
-from kivy.properties import ObjectProperty
+from kivy.properties import ObjectProperty, ListProperty
+from kivy.uix.boxlayout import BoxLayout
 import os
 
 from components import AudioFileView

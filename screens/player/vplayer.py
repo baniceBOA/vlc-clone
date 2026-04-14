@@ -83,6 +83,19 @@ class Player(MDScreen):
         self.is_landscape = not self.is_landscape
         self.apply_orientation()
 
+    def enter_pip_mode(self):
+        if platform != 'android':
+            return
+        try:
+            from jnius import autoclass
+            Build = autoclass('android.os.Build')
+            if Build.VERSION.SDK_INT >= 26:
+                PythonActivity = autoclass('org.kivy.android.PythonActivity')
+                activity = PythonActivity.mActivity
+                activity.enterPictureInPictureMode()
+        except Exception as e:
+            print('PIP failed:', e)
+
     def check_device_orientation(self, dt):
         try:
             acc = accelerometer.acceleration

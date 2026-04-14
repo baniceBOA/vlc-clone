@@ -30,7 +30,7 @@ ffpyplayer
 ffmpeg-python
 
 ```bash
-    pip install ffmped-python
+    pip install ffmpeg-python
 ```
 
 to run the appplication just navigate to the directory with `main.py` and run
