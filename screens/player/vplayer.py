@@ -2,6 +2,7 @@
 from kivymd.uix.screen import  MDScreen
 from kivy.lang import Builder
 from kivy.properties import StringProperty, NumericProperty, BooleanProperty
+from kivymd.uix.snackbar import Snackbar
 from mutagen.mp4 import MP4
 from kivy.clock import Clock
 from kivy.utils import platform
@@ -117,31 +118,50 @@ class Player(MDScreen):
             self.apply_orientation()
 
     def on_source(self, instance, value):
-        if value.endswith('.mp4'):
-            self.duration = MP4(value).info.length
-            delta = timedelta(seconds=self.duration)
-            h, m, s = str(delta).split(':')
-            self.time_duration = f'{h}:{m}:{round(float(s))}'
-        elif value.endswith('.mkv') or value.endswith('.avi'):
-            self.duration = self.get_length(value)
-            delta = timedelta(seconds=self.duration)
-            h, m, s = str(delta).split(':')
-            self.time_duration = f'{h}:{m}:{round(float(s))}'
-        else:
-            #prevent division by zero error
+        try:
+            if not value or not os.path.exists(value):
+                raise FileNotFoundError(f"Video file not found: {value}")
+
+            if value.endswith('.mp4'):
+                self.duration = MP4(value).info.length
+                delta = timedelta(seconds=self.duration)
+                h, m, s = str(delta).split(':')
+                self.time_duration = f'{h}:{m}:{round(float(s))}'
+            elif value.endswith('.mkv') or value.endswith('.avi'):
+                self.duration = self.get_length(value)
+                delta = timedelta(seconds=self.duration)
+                h, m, s = str(delta).split(':')
+                self.time_duration = f'{h}:{m}:{round(float(s))}'
+            else:
+                # prevent division by zero error
+                self.duration = 1
+        except Exception as exc:
+            print(f"Video on_source failed for {value}: {exc}")
             self.duration = 1
+            self.time_duration = '00:00'
+            Snackbar(
+                text=f"Cannot load video metadata: {exc}",
+                duration=4,
+            ).open()
 
             
         
 
     
     def play_video(self, instance):
-        if instance.icon == 'play':
-            self.ids.video.play = True
-            instance.icon = 'pause'
-        elif instance.icon == 'pause':
-            self.ids.video.play = False
-            instance.icon = 'play'
+        try:
+            if instance.icon == 'play':
+                self.ids.video.play = True
+                instance.icon = 'pause'
+            elif instance.icon == 'pause':
+                self.ids.video.play = False
+                instance.icon = 'play'
+        except Exception as exc:
+            print(f"Video playback control failed: {exc}")
+            Snackbar(
+                text=f"Cannot play/pause video: {exc}",
+                duration=4,
+            ).open()
     def seek_video(self, value):
         self.ids.video.seek(value/100, precise=True)
 
