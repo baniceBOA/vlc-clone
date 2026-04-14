@@ -96,6 +96,14 @@ class VLC(MDScreen):
 
     def on_enter(self, *args):
         print(self.ids.sliverappbar.toolbar_cls)
+
+    def on_toolbar_search(self):
+        current_screen = self.screen_manager.current_screen
+        if current_screen and hasattr(current_screen, 'ids') and 'search_field' in current_screen.ids:
+            current_screen.ids.search_field.focus = True
+            return True
+        return False
+
     def tab_switch(self, instance_tabs,instance_tab,instance_tab_label,tab_text):
         print(self.system_storage)
         if instance_tab.title == 'video':

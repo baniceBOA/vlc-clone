@@ -75,14 +75,8 @@ class VideoFolderScreen(MDScreen):
     def create_thumb_pic(self):
         thumb_dir = self.get_thumb_dir()
         os.makedirs(thumb_dir, exist_ok=True)
-        existing_thumbs = set(os.listdir(thumb_dir))
 
         for filename in self.videos:
-            thumb_name = f"{os.path.splitext(os.path.basename(filename))[0]}.png"
-            thumb_path = os.path.join(thumb_dir, thumb_name)
-            if thumb_name in existing_thumbs and os.path.exists(thumb_path):
-                continue
-
             if not os.path.exists(filename):
                 continue
 

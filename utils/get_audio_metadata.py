@@ -1,5 +1,44 @@
 import os
+import time
 from mutagen import File
+from .cache_utils import (
+    load_json_cache,
+    save_json_cache,
+    file_fingerprint,
+    find_cache_entry_by_fingerprint,
+)
+
+CACHE_FILE = 'audio_metadata_cache.json'
+
+
+def load_metadata_cache():
+    return load_json_cache(CACHE_FILE)
+
+
+def save_metadata_cache(cache):
+    save_json_cache(CACHE_FILE, cache)
+
+
+def _get_cached_metadata(file_path, fingerprint, cache):
+    if not fingerprint:
+        return None, cache
+
+    path_key = os.path.abspath(file_path)
+    entry = cache.get(path_key)
+    if entry and entry.get('fingerprint') == fingerprint:
+        return entry.get('metadata'), cache
+
+    _, other_entry = find_cache_entry_by_fingerprint(cache, fingerprint)
+    if other_entry and other_entry.get('metadata'):
+        cache[path_key] = {
+            'metadata': other_entry['metadata'],
+            'fingerprint': fingerprint,
+            'updated': time.time(),
+        }
+        return other_entry['metadata'], cache
+
+    return None, cache
+
 
 def get_audio_metadata(file_path):
     metadata = {
