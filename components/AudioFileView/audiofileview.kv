@@ -1,9 +1,10 @@
 <AudioFileView>:
-    TwoLineIconListItem:
-        text:root.source
-        secondary_text:f"Path: {root.source}"
-        IconLeftWidget:
-            icon:'music'
-        IconRightWidget:
-            icon:'dots-vertical'
+    text: root.file_path
+    secondary_text: f"Path: {root.file_path}"
+    on_release: root.open_audio_player()
+    IconLeftWidget:
+        icon: 'music'
+    IconRightWidget:
+        icon: 'dots-vertical'
+        on_release: root.show_options()
 

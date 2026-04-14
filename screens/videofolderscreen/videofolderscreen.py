@@ -10,6 +10,7 @@ from threading import Thread
 from functools import partial
 
 from utils import create_thumbnail
+from utils.cache_utils import load_file_list_cache, sync_files_cache
 from components import VideoFolder, SilverTopAppBar
 Builder.load_file(os.path.join(os.path.dirname(__file__), 'videofolderscreen.kv'))
 
@@ -17,6 +18,7 @@ Builder.load_file(os.path.join(os.path.dirname(__file__), 'videofolderscreen.kv'
 class VideoFolderScreen(MDScreen):
     folders = DictProperty()
     ''' Display the  videos according to the folders they belong to'''
+    VIDEO_EXTENSIONS = ('.mp4', '.mkv', '.avi')
     def _find_index_in_motion_filter(self, type_id, widget):
         return super()._find_index_in_motion_filter(type_id, widget)
     def find_videos(self, interval):
@@ -24,27 +26,24 @@ class VideoFolderScreen(MDScreen):
 
     def _scan_videos(self):
         app = MDApp.get_running_app()
-        paths = app.root.system_storage
-        videos = []
+        paths = getattr(app.root, 'system_storage', [])
+        videos = sync_files_cache('video_files', paths, self.VIDEO_EXTENSIONS)
+        folders = self._build_folder_index(videos)
+        Clock.schedule_once(partial(self._on_scan_complete, videos, folders), 0)
+
+    def _build_folder_index(self, videos):
         folders = {}
-
-        for path in paths:
-            for dirpath, dirname, filenames in os.walk(path):
-                for filename in filenames:
-                    if filename.endswith('.mp4') or filename.endswith('.mkv') or filename.endswith('.avi'):
-                        filepath = os.path.join(dirpath, filename)
-                        videos.append(filepath)
-
         for vid in videos:
             dirs = os.path.dirname(vid).split(os.sep)[-1]
             if dirs in folders:
                 continue
             metadata = {}
-            metadata['files'] = [os.path.join(os.path.dirname(vid), filename) for filename in os.listdir(os.path.dirname(vid)) if self.check_video(filename)]
+            metadata['files'] = [os.path.join(os.path.dirname(vid), filename)
+                                 for filename in os.listdir(os.path.dirname(vid))
+                                 if self.check_video(filename)]
             metadata['count'] = len(metadata['files'])
             folders[dirs] = metadata
-
-        Clock.schedule_once(partial(self._on_scan_complete, videos, folders), 0)
+        return folders
 
     def _on_scan_complete(self, videos, folders, interval):
         self.videos = videos
@@ -54,8 +53,22 @@ class VideoFolderScreen(MDScreen):
 
     def on_enter(self, *args):
         Logger.info('Finding Images')
+        self.load_cached_videos()
         if not self.folders:
             Clock.schedule_once(self.find_videos, 1)
+
+    def load_cached_videos(self):
+        cached = load_file_list_cache('video_files')
+        if not cached:
+            return
+
+        videos = [path for path in cached.keys() if os.path.exists(path) and self.check_video(path)]
+        if not videos:
+            return
+
+        videos.sort()
+        folders = self._build_folder_index(videos)
+        self._on_scan_complete(videos, folders, 0)
 
     def check_video(self, filename):
         if filename.endswith('.mp4') or filename.endswith('.mkv')  or filename.endswith('.avi'):

@@ -1,0 +1,25 @@
+#: import dp kivy.metrics.dp
+
+<SearchScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        spacing: dp(8)
+        padding: dp(8)
+
+        MDTextField:
+            id: search_field
+            hint_text: 'Search videos'
+            size_hint_x: 0.95
+            pos_hint: {'center_x': 0.5}
+            on_text: root.on_search(self.text)
+
+        RecycleView:
+            id: rv
+            viewclass: 'TwoLineIconListItem'
+            data: root.results
+            RecycleBoxLayout:
+                default_size: None, dp(72)
+                default_size_hint: 1, None
+                size_hint_y: None
+                height: self.minimum_height
+                orientation: 'vertical'

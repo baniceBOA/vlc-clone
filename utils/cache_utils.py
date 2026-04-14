@@ -68,5 +68,42 @@ def find_cache_entry_by_fingerprint(cache, fingerprint):
     return None, None
 
 
+def load_file_list_cache(cache_type):
+    cache = load_json_cache(CACHE_FILENAME)
+    if not isinstance(cache, dict):
+        return {}
+    file_cache = cache.get(cache_type, {})
+    return file_cache if isinstance(file_cache, dict) else {}
+
+
+def save_file_list_cache(cache_type, file_data):
+    cache = load_json_cache(CACHE_FILENAME)
+    if not isinstance(cache, dict):
+        cache = {}
+    cache[cache_type] = file_data
+    save_json_cache(CACHE_FILENAME, cache)
+
+
+def sync_files_cache(cache_type, paths, extensions):
+    updated_cache = {}
+    for root in paths:
+        if not os.path.exists(root):
+            continue
+        for dirpath, dirnames, filenames in os.walk(root):
+            dirnames[:] = [d for d in dirnames if not d.startswith('.')]
+            for filename in filenames:
+                if filename.startswith('.'):
+                    continue
+                lower_name = filename.lower()
+                if not any(lower_name.endswith(ext) for ext in extensions):
+                    continue
+                file_path = os.path.abspath(os.path.join(dirpath, filename))
+                fingerprint = file_fingerprint(file_path)
+                if fingerprint:
+                    updated_cache[file_path] = {'fingerprint': fingerprint}
+    save_file_list_cache(cache_type, updated_cache)
+    return sorted(updated_cache.keys())
+
+
 def make_content_hash(value):
     return hashlib.sha256(value.encode('utf-8')).hexdigest()[:16]

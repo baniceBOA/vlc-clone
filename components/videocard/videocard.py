@@ -21,17 +21,22 @@ class VideoCard(MDCard):
                 raise FileNotFoundError(f"Video file not found: {self.source}")
 
             app = MDApp.get_running_app()
-            app.root.screen_manager.current = 'player'
+            player = app.root.screen_manager.get_screen('player')
+            player.source = self.source
+            player.title = self.filename
+            player.thumb = self.thumb
+            try:
+                player.ids.video.preview = self.thumb
+            except Exception:
+                pass
+
+            if app.root.screen_manager.current != 'player':
+                app.root.screen_manager.current = 'player'
             if hasattr(app.root, 'ids') and app.root.ids.get('bottom_bar'):
                 try:
                     app.root.remove_widget(app.root.ids.bottom_bar)
                 except Exception:
                     pass
-
-            player = app.root.screen_manager.get_screen('player')
-            player.source = self.source
-            player.title = self.filename
-            player.thumb = self.thumb
         except Exception as exc:
             print(f"Video playback failed for {self.source}: {exc}")
             Snackbar(

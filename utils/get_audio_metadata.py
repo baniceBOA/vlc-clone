@@ -1,6 +1,6 @@
 import os
 import time
-from mutagen import File
+
 from .cache_utils import (
     load_json_cache,
     save_json_cache,
@@ -9,6 +9,11 @@ from .cache_utils import (
 )
 
 CACHE_FILE = 'audio_metadata_cache.json'
+
+try:
+    from mutagen import File
+except ModuleNotFoundError:
+    File = None
 
 
 def load_metadata_cache():
@@ -56,6 +61,9 @@ def get_audio_metadata(file_path):
         return cached_metadata
 
     try:
+        if File is None:
+            raise RuntimeError('mutagen package is not installed')
+
         audio = File(file_path)
 
         if audio is not None:

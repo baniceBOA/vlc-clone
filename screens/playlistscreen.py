@@ -17,8 +17,12 @@ class PlaylistScreen(MDScreen):
         app = MDApp.get_running_app()
         self.playlist = []
         try:
-            audio_screen = app.root.screen_manager.get_screen('audioscreen')
-            self.playlist = list(getattr(audio_screen, 'music', []))
+            user_playlist = getattr(app, 'user_playlist', None)
+            if user_playlist is not None:
+                self.playlist = list(user_playlist)
+            else:
+                audio_screen = app.root.screen_manager.get_screen('audioscreen')
+                self.playlist = list(getattr(audio_screen, 'music', []))
         except Exception as exc:
             print(f'Unable to load playlist: {exc}')
         self.render_playlist()

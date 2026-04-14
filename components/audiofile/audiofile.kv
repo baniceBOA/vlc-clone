@@ -1,10 +1,8 @@
 <AudioFile>:
-    text:root.name
-    on_release:root.play_audio(self.source)
-    IconLeftWidget:
-        icon:'music'
+    text: root.name
+    on_release: root.play_audio(self.source)
     MDListItemRightContainer:
         RightIconButton:
-            icon:'dots-vertical'
-            on_release:root.show_option()
+            icon: 'dots-vertical'
+            on_release: root.show_option()
     

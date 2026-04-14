@@ -1,5 +1,5 @@
 
-from kivymd.uix.list import OneLineAvatarIconListItem
+from kivymd.uix.list import OneLineRightIconListItem
 from kivymd.uix.button import MDIconButton
 from kivymd.app import MDApp
 from kivy.properties import StringProperty, ObjectProperty, NumericProperty
@@ -16,7 +16,7 @@ Builder.load_file(os.path.join(os.path.dirname(__file__), 'audiofile.kv'))
 class RightIconButton(MDIconButton):
     pass
 
-class AudioFile(OneLineAvatarIconListItem):
+class AudioFile(OneLineRightIconListItem):
     source = StringProperty() # for playing the music and setting the music name
     name = StringProperty()
     player = ObjectProperty()

@@ -33,7 +33,20 @@ class Player(MDScreen):
         self._accel_event = None
 
     def late_init(self, interval):
-        self.ids.video.bind(position=self.change_slider_value)
+        self.ids.video.bind(position=self.change_slider_value, on_error=self.on_video_error)
+
+    def on_video_error(self, instance, *args):
+        try:
+            error_text = args[0] if args else 'Unknown video playback error'
+        except Exception:
+            error_text = 'Unknown video playback error'
+        print(f"Video widget error for {instance.source}: {error_text}")
+        Snackbar(
+            text=f"Cannot play video: {error_text}",
+            duration=4,
+        ).open()
+        if self.ids.video.play:
+            self.ids.video.play = False
 
     def on_enter(self, *args):
         if platform == 'android':

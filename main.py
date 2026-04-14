@@ -1,4 +1,4 @@
-__version__ = '1.2.1'
+__version__ = '1.2.2'
 import os
 os.environ['KIVY_VIDEO'] = 'ffpyplayer'
 from kivymd.app import MDApp
@@ -13,9 +13,8 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.button import MDFlatButton, MDRaisedButton
 
 if platform != 'android':
-    Window.size = (400, 688)
-    Window.top = 1
-
+    Window.size = (400, 640)
+    Window.top = 0.9
 from plyer import storagepath
 
 
@@ -99,9 +98,15 @@ class VLC(MDScreen):
 
     def on_toolbar_search(self):
         current_screen = self.screen_manager.current_screen
-        if current_screen and hasattr(current_screen, 'ids') and 'search_field' in current_screen.ids:
-            current_screen.ids.search_field.focus = True
+        if current_screen is None:
+            return False
+
+        if self.screen_manager.has_screen('search'):
+            search_screen = self.screen_manager.get_screen('search')
+            search_screen.set_search_context(current_screen.name)
+            self.screen_manager.current = 'search'
             return True
+
         return False
 
     def tab_switch(self, instance_tabs,instance_tab,instance_tab_label,tab_text):

@@ -12,8 +12,9 @@ class AudioRV(BoxLayout):
     music_file = ListProperty()
 
     def on_music_file(self, *args):
-        self.ids.rv.data = []
-        for music in self.music_file:
-            self.ids.rv.data.append({'source':music})
+        self.ids.rv.data = [
+            {'file_path': music}
+            for music in self.music_file
+        ]
         
     
