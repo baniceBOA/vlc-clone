@@ -17,6 +17,7 @@
             title:root.title
             pos_hint:{'top':1}
             md_bg_color:app.theme_cls.bg_darkest
+            left_action_items:[['arrow-left', lambda x: root.close_player()]]
             right_action_items:[['screen-rotation', lambda x: root.toggle_landscape()], ['picture-in-picture', lambda x: root.enter_pip_mode()]]
         MDBoxLayout:
             id: control_bar

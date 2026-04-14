@@ -50,6 +50,13 @@ class Player(MDScreen):
     def on_leave(self, *args):
         self.ids.video.play = False
         self.ids.video.unload()
+        app = MDApp.get_running_app()
+        if app and app.root and hasattr(app.root, 'ids') and app.root.ids.get('bottom_bar'):
+            try:
+                if not app.root.ids.bottom_bar.parent:
+                    app.root.add_widget(app.root.ids.bottom_bar)
+            except Exception:
+                pass
         if platform == 'android':
             try:
                 accelerometer.disable()
@@ -96,6 +103,22 @@ class Player(MDScreen):
                 activity.enterPictureInPictureMode()
         except Exception as e:
             print('PIP failed:', e)
+
+    def close_player(self, *args):
+        app = MDApp.get_running_app()
+        if app and app.root:
+            if hasattr(app.root, 'ids') and app.root.ids.get('bottom_bar'):
+                try:
+                    if not app.root.ids.bottom_bar.parent:
+                        app.root.add_widget(app.root.ids.bottom_bar)
+                except Exception:
+                    pass
+            if hasattr(app.root, 'go_back') and app.root.go_back():
+                return True
+            if hasattr(app.root, 'screen_manager') and app.root.screen_manager.has_screen('videofolder'):
+                app.root.screen_manager.current = 'videofolder'
+                return True
+        return False
 
     def check_device_orientation(self, dt):
         try:
