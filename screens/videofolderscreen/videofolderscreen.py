@@ -69,6 +69,18 @@ class VideoFolderScreen(MDScreen):
             return os.path.join(app.user_data_dir, 'assests', 'thumbs')
         return os.path.join('assests', 'thumbs')
 
+    def _find_cached_thumbnail(self, file_path, thumb_dir):
+        if not file_path or not os.path.isdir(thumb_dir):
+            return None
+
+        basename = os.path.splitext(os.path.basename(file_path))[0]
+        for candidate in os.listdir(thumb_dir):
+            if candidate.startswith(basename) and candidate.lower().endswith('.png'):
+                candidate_path = os.path.join(thumb_dir, candidate)
+                if os.path.exists(candidate_path):
+                    return candidate_path
+        return None
+
     def on_folders(self, *args):
         #Clock.schedule_once(self.update, 1)
         pass 
@@ -99,10 +111,10 @@ class VideoFolderScreen(MDScreen):
             data['vid_count'] = f"{count['count']} videos"
             first_file = count['files'][0] if count['files'] else None
             if first_file:
-                expected_thumb = os.path.join(thumb_dir, f"{os.path.splitext(os.path.basename(first_file))[0]}.png")
-                data['folder_collect_thumb'] = expected_thumb if os.path.exists(expected_thumb) else 'assests/thumbs/rihanna.png'
+                expected_thumb = self._find_cached_thumbnail(first_file, thumb_dir)
+                data['folder_collect_thumb'] = expected_thumb or ''
             else:
-                data['folder_collect_thumb'] = 'assests/thumbs/rihanna.png'
+                data['folder_collect_thumb'] = ''
             data['files'] = count['files']
             self.ids.rv.data.append(data)
         

@@ -124,7 +124,7 @@ class MainApp(MDApp):
         self.theme_cls.primary_hue = "800"
         self.theme_cls.theme_style = 'Dark'
         if platform == 'android':
-            Window.softinput_mode = "adjust_resize"
+            Window.softinput_mode = "resize"
         return VLC()
     def on_start(self):
         Window.bind(on_keyboard=self.on_keyboard)

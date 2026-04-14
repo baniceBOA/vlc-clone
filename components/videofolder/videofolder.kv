@@ -3,7 +3,7 @@
     MDRelativeLayout:
         MDSmartTile:
             pos_hint:{'center_x':0.5, 'center_y':0.5}
-            source:root.folder_collect_thumb
+            source: root.folder_collect_thumb if root.folder_collect_thumb else ''
             overlap:False
             lines:2
             on_release: root.change_screen()
@@ -14,6 +14,13 @@
                 secondary_text:root.vid_count
                 secondary_theme_text_color:'Custom'
                 secondary_text_color:'white' if app.theme_cls.theme_style == 'Dark' else 'orange'
+            MDIcon:
+                icon: 'video'
+                pos_hint: {'center_x': 0.5, 'center_y': 0.6}
+                halign: 'center'
+                theme_text_color: 'Custom'
+                text_color: 'white' if app.theme_cls.theme_style == 'Dark' else 'black'
+                opacity: 1 if not root.folder_collect_thumb else 0
         MDIconButton:
             icon:'dots-vertical'
             pos_hint:{'center_x':0.85, 'center_y':0.85}

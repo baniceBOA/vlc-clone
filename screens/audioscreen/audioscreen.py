@@ -1,15 +1,15 @@
-
 from kivymd.uix.screen import MDScreen
 from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivy.properties import ListProperty, DictProperty, StringProperty
 from kivy.clock import Clock
+from threading import Thread
+from functools import partial
 import os
 
 from components import AudioRV
 from utils import get_audio_metadata
 Builder.load_file(os.path.join(os.path.dirname(__file__), 'audioscreen.kv'))
-
 
 
 class AudioScreen(MDScreen):
@@ -21,12 +21,18 @@ class AudioScreen(MDScreen):
     genres_dict = DictProperty({})
 
     def find_music(self, interval):
-        self.music = []
-        self.artists_dict = {}
-        self.albums_dict = {}
-        self.genres_dict = {}
+        if hasattr(self, '_scan_thread') and self._scan_thread.is_alive():
+            return
+        self._scan_thread = Thread(target=self._find_music, daemon=True)
+        self._scan_thread.start()
+
+    def _find_music(self):
+        music = []
+        artists = {}
+        albums = {}
+        genres = {}
         app = MDApp.get_running_app()
-        paths = app.root.system_storage
+        paths = getattr(app.root, 'system_storage', [])
         for path in paths:
             if not os.path.exists(path):
                 continue
@@ -37,17 +43,25 @@ class AudioScreen(MDScreen):
                     for filename in filenames:
                         if filename.lower().endswith(('.mp3', '.m4a', '.wav', '.flac', '.ogg')):
                             music_path = os.path.join(dirpath, filename)
-                            self.music.append(music_path)
+                            music.append(music_path)
                             meta = get_audio_metadata(music_path)
                             artist = meta.get('artist', 'Unknown Artist') or 'Unknown Artist'
                             album = meta.get('album', 'Unknown Album') or 'Unknown Album'
                             genre = meta.get('genre', 'Unknown Genre') or 'Unknown Genre'
-                            self.artists_dict.setdefault(artist, []).append(music_path)
-                            self.albums_dict.setdefault(album, []).append(music_path)
-                            self.genres_dict.setdefault(genre, []).append(music_path)
+                            artists.setdefault(artist, []).append(music_path)
+                            albums.setdefault(album, []).append(music_path)
+                            genres.setdefault(genre, []).append(music_path)
             except Exception as e:
                 print(f'Audio scan failed for {path}: {e}')
 
+        Clock.schedule_once(partial(self._on_find_complete, music, artists, albums, genres), 0)
+
+    def _on_find_complete(self, music, artists, albums, genres, dt):
+        self.music = music
+        self.artists_dict = artists
+        self.albums_dict = albums
+        self.genres_dict = genres
+        self.update(0)
 
     def on_pre_enter(self, *args):
         if hasattr(self.ids, 'search_field'):
@@ -55,7 +69,6 @@ class AudioScreen(MDScreen):
 
     def on_enter(self, *args):
         Clock.schedule_once(self.find_music, 0.2)
-        Clock.schedule_once(self.update, 1)
 
     def on_search(self, query):
         self.search_query = query.strip().lower()
@@ -67,8 +80,8 @@ class AudioScreen(MDScreen):
             m for m in self.music
             if not query or query in os.path.basename(m).lower() or query in m.lower()
         ]
-        if hasattr(self.ids, 'tracks') and hasattr(self.ids.tracks.ids, 'audio_rv'):
-            self.ids.tracks.ids.audio_rv.music_file = filtered_music
+        if hasattr(self.ids, 'tracks') and hasattr(self.ids.tracks.ids, 'audio_rv_widget'):
+            self.ids.tracks.ids.audio_rv_widget.music_file = filtered_music
 
         artists = self.artists_dict
         if query:
